@@ -36,6 +36,11 @@ public class JwtService implements CommandLineRunner {
                 .compact();
     }
 
+    public String createToken(String username)
+    {
+        return createToken(new HashMap<>(),username);
+    }
+
     private Claims extractAllPayload(String tokens)
     {
         return Jwts
