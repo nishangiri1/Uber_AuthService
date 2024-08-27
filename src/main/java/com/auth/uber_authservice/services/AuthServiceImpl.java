@@ -4,18 +4,15 @@ import com.auth.uber_authservice.dto.AuthRequestDto;
 import com.auth.uber_authservice.dto.AuthResponseDto;
 import com.auth.uber_authservice.dto.PassangerDto;
 import com.auth.uber_authservice.dto.PassangerSignUpRequestDto;
-import com.auth.uber_authservice.exceptions.InvalidCredentialsException;
 import com.auth.uber_authservice.models.Passanger;
 import com.auth.uber_authservice.repositories.PassangerRepository;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -61,7 +58,7 @@ public class AuthServiceImpl implements AuthService {
             if (authentication.isAuthenticated()) {
                 String jwtToken = jwtService.createToken(authRequestDto.getEmail());
                 ResponseCookie cookie = ResponseCookie.from("JwtToken", jwtToken)
-                        .httpOnly(true)
+                        .httpOnly(false)
                         .secure(false)
                         .path("/")
                         .maxAge(expiryCookie)

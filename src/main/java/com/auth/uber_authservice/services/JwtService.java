@@ -67,7 +67,7 @@ public class JwtService implements CommandLineRunner {
         return extractExpiryDate(token).before(new Date());
     }
 
-    private String extractEmail(String token)
+    public String extractEmail(String token)
     {
         return extractPayload(token,Claims::getSubject);
     }
@@ -79,7 +79,7 @@ public class JwtService implements CommandLineRunner {
     }
 
 
-    private boolean validateToken(String token,String email)
+    public boolean validateToken(String token,String email)
     {
        final String userEmailFetchFromToken= extractEmail(token);
        return (userEmailFetchFromToken.equals(email) && !isTokenExpired(token));

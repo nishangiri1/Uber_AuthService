@@ -13,4 +13,5 @@ import org.springframework.stereotype.Service;
 public interface AuthService {
     public PassangerDto signupPassanger(PassangerSignUpRequestDto passangerSignUpRequestDto);
     public AuthResponseDto authenticateCreateTokenAndSetCookie(AuthRequestDto authRequestDto, HttpServletResponse response);
+
 }
