@@ -1,17 +1,17 @@
 package com.auth.uber_authservice.helper;
 
-import com.entity.uberprojectentityservice.models.Passanger;
+import com.entity.uberprojectentityservice.models.Passenger;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 
-public class AuthPassanngerDetail extends Passanger implements UserDetails {
+public class AuthPassanngerDetail extends Passenger implements UserDetails {
 
     public String email;
     public String password;
 
-    public AuthPassanngerDetail(Passanger passanger)
+    public AuthPassanngerDetail(Passenger passanger)
     {
         this.email=passanger.getEmail();
         this.password=passanger.getPassword();

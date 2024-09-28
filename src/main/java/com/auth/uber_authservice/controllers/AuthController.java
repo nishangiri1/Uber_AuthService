@@ -1,8 +1,8 @@
 package com.auth.uber_authservice.controllers;
 
 import com.auth.uber_authservice.dto.AuthRequestDto;
-import com.auth.uber_authservice.dto.PassangerDto;
-import com.auth.uber_authservice.dto.PassangerSignUpRequestDto;
+import com.auth.uber_authservice.dto.PassengerDto;
+import com.auth.uber_authservice.dto.PassengerSignUpRequestDto;
 import com.auth.uber_authservice.services.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -22,9 +22,9 @@ public class AuthController {
     }
 
     @PostMapping("/signup/passenger")
-    public ResponseEntity<PassangerDto> signUp(@RequestBody PassangerSignUpRequestDto requestDto)
+    public ResponseEntity<PassengerDto> signUp(@RequestBody PassengerSignUpRequestDto requestDto)
     {
-        PassangerDto response=authService.signupPassanger(requestDto);
+        PassengerDto response=authService.signupPassanger(requestDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
@@ -33,7 +33,6 @@ public class AuthController {
     {
         System.out.println("Requested credentials : "+authRequestDto.getEmail()+" "+authRequestDto.getPassword());
         try{
-
         return new ResponseEntity<>(authService.authenticateCreateTokenAndSetCookie(authRequestDto,response),HttpStatus.OK);
         }catch (AuthenticationException e) {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.FORBIDDEN);

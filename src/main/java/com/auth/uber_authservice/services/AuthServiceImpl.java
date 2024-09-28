@@ -2,11 +2,11 @@ package com.auth.uber_authservice.services;
 
 import com.auth.uber_authservice.dto.AuthRequestDto;
 import com.auth.uber_authservice.dto.AuthResponseDto;
-import com.auth.uber_authservice.dto.PassangerDto;
-import com.auth.uber_authservice.dto.PassangerSignUpRequestDto;
+import com.auth.uber_authservice.dto.PassengerSignUpRequestDto;
+import com.auth.uber_authservice.dto.PassengerDto;
 import com.auth.uber_authservice.exceptions.InvalidCredentialsException;
 import com.auth.uber_authservice.repositories.PassangerRepository;
-import com.entity.uberprojectentityservice.models.Passanger;
+import com.entity.uberprojectentityservice.models.Passenger;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -38,16 +38,16 @@ public class AuthServiceImpl implements AuthService {
         this.passangerRepository = passangerRepository;
     }
 
-    public PassangerDto signupPassanger(PassangerSignUpRequestDto passangerSignUpRequestDto)
+    public PassengerDto signupPassanger(PassengerSignUpRequestDto passangerSignUpRequestDto)
     {
-        Passanger passanger=Passanger.builder()
+        Passenger passanger=Passenger.builder()
                 .email(passangerSignUpRequestDto.getEmail())
                 .name(passangerSignUpRequestDto.getName())
                 .password(bCryptPasswordEncoder.encode(passangerSignUpRequestDto.getPassword()))
                 .phoneNumber(passangerSignUpRequestDto.getPhoneNumber()) //todo: Entrypt the password
                 .build();
-        Passanger newPassanger =passangerRepository.save(passanger);
-        return PassangerDto.from(newPassanger);
+        Passenger newPassenger =passangerRepository.save(passanger);
+        return PassengerDto.from(newPassenger);
     }
     public AuthResponseDto authenticateCreateTokenAndSetCookie(AuthRequestDto authRequestDto, HttpServletResponse response)
     {
