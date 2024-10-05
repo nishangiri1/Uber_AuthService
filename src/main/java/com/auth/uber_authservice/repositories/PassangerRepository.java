@@ -11,4 +11,5 @@ import java.util.Optional;
 @Repository
 public interface PassangerRepository extends JpaRepository<Passenger, Long> {
     Optional<Passenger> findPassangerByEmail(String email);
+    Optional<Passenger> findPassengerByPhoneNumber(String number);
 }

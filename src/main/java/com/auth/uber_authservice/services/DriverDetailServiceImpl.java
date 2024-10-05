@@ -1,8 +1,9 @@
 package com.auth.uber_authservice.services;
 
+import com.auth.uber_authservice.helper.AuthDriverDetail;
 import com.auth.uber_authservice.helper.AuthPassanngerDetail;
-import com.auth.uber_authservice.repositories.PassangerRepository;
-import com.entity.uberprojectentityservice.models.Passenger;
+import com.auth.uber_authservice.repositories.DriverRepository;
+import com.entity.uberprojectentityservice.models.Driver;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,17 +13,17 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class UserDetailServiceImpl implements UserDetailsService {
+public class DriverDetailServiceImpl implements UserDetailsService {
 
     @Autowired
-    private PassangerRepository passangerRepository;
-
+    private DriverRepository driverRepository;
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Optional<Passenger> passanger=passangerRepository.findPassangerByEmail(username);
-        if(passanger.isPresent())
-            return new AuthPassanngerDetail(passanger.get());
-        else
-            throw new UsernameNotFoundException("Email with "+passanger.get().getEmail()+" email not found");
+        Optional<Driver> driver=driverRepository.findDriverByPhoneNumber(username);
+        if(driver.isPresent()){
+            return new AuthDriverDetail(driver.get());
+        }else{
+            throw new UsernameNotFoundException("Driver not found with username "+driver.get().getPhoneNumber());
+        }
     }
 }

@@ -7,7 +7,7 @@ import lombok.*;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class PassengerSignUpRequestDto {
+public class PassengerSignUpDtp {
 
     private String email;
 

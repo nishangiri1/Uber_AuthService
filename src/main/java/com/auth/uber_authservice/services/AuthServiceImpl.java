@@ -1,11 +1,10 @@
 package com.auth.uber_authservice.services;
 
-import com.auth.uber_authservice.dto.AuthRequestDto;
-import com.auth.uber_authservice.dto.AuthResponseDto;
-import com.auth.uber_authservice.dto.PassengerSignUpRequestDto;
-import com.auth.uber_authservice.dto.PassengerDto;
+import com.auth.uber_authservice.dto.*;
 import com.auth.uber_authservice.exceptions.InvalidCredentialsException;
+import com.auth.uber_authservice.repositories.DriverRepository;
 import com.auth.uber_authservice.repositories.PassangerRepository;
+import com.entity.uberprojectentityservice.models.Driver;
 import com.entity.uberprojectentityservice.models.Passenger;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,44 +28,75 @@ public class AuthServiceImpl implements AuthService {
 
     private final BCryptPasswordEncoder bCryptPasswordEncoder;
     private final PassangerRepository passangerRepository;
+    private final DriverRepository driverRepository;
 
 
-    public AuthServiceImpl(AuthenticationManager authenticationManager, JwtService jwtService, BCryptPasswordEncoder bCryptPasswordEncoder, PassangerRepository passangerRepository) {
+    public AuthServiceImpl(AuthenticationManager authenticationManager, JwtService jwtService, BCryptPasswordEncoder bCryptPasswordEncoder, PassangerRepository passangerRepository,
+                           DriverRepository driverRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.passangerRepository = passangerRepository;
+        this.driverRepository = driverRepository;
     }
 
-    public PassengerDto signupPassanger(PassengerSignUpRequestDto passangerSignUpRequestDto)
+    public PassengerDto signupPassanger(PassengerSignUpDtp passangerSignUpRequestDto)
     {
         Passenger passanger=Passenger.builder()
                 .email(passangerSignUpRequestDto.getEmail())
-                .name(passangerSignUpRequestDto.getName())
+                .fullName(passangerSignUpRequestDto.getName())
                 .password(bCryptPasswordEncoder.encode(passangerSignUpRequestDto.getPassword()))
                 .phoneNumber(passangerSignUpRequestDto.getPhoneNumber()) //todo: Entrypt the password
                 .build();
         Passenger newPassenger =passangerRepository.save(passanger);
         return PassengerDto.from(newPassenger);
     }
-    public AuthResponseDto authenticateCreateTokenAndSetCookie(AuthRequestDto authRequestDto, HttpServletResponse response)
+    public AuthResponseDto authenticateCreateTokenAndSetCookiePassenger(AuthRequestDto authRequestDto, HttpServletResponse response)
     {
-            Authentication authentication = authenticationManager
-                    .authenticate(
-                            new UsernamePasswordAuthenticationToken(
-                                    authRequestDto.getEmail(), authRequestDto.getPassword()));
-            if (authentication.isAuthenticated()) {
-                String jwtToken = jwtService.createToken(authRequestDto.getEmail());
-                ResponseCookie cookie = ResponseCookie.from("JwtToken", jwtToken)
-                        .httpOnly(false)
-                        .secure(false)
-                        .path("/")
-                        .maxAge(expiryCookie)
-                        .build();
-                response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-                return AuthResponseDto.builder().success(true).build();
-            } else {
-                throw new InvalidCredentialsException("Invalid email or password");
-            }
+        return getAuthResponseDto(authRequestDto, response);
     }
+
+    @Override
+    public AuthResponseDto authenticateCreateTokenAndSetCookieDriver(AuthRequestDto authRequestDto, HttpServletResponse response) {
+        return getAuthResponseDto(authRequestDto, response);
+    }
+
+    private AuthResponseDto getAuthResponseDto(AuthRequestDto authRequestDto, HttpServletResponse response) {
+        Authentication authentication=authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        authRequestDto.getEmail(),authRequestDto.getPassword()
+                )
+        );
+        if (authentication.isAuthenticated()) {
+            String jwtToken = jwtService.createToken(authRequestDto.getEmail());
+            ResponseCookie cookie = ResponseCookie.from("JwtToken", jwtToken)
+                    .httpOnly(false)
+                    .secure(false)
+                    .path("/")
+                    .maxAge(expiryCookie)
+                    .build();
+            response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
+            return AuthResponseDto.builder().success(true).build();
+        } else {
+            throw new InvalidCredentialsException("Invalid email or password");
+        }
+    }
+
+    @Override
+    public DriverDto signupDriver(DriverSignupDTO driverSignupDTO) {
+
+        Passenger existingPassenger=passangerRepository.findPassengerByPhoneNumber(driverSignupDTO.getPhoneNumber())
+                .orElseThrow(()->new RuntimeException("Passenger not found"));
+        Driver driver=Driver.builder()
+                .name(driverSignupDTO.getUsername())
+                .licenseNumber(driverSignupDTO.getLicenseNumber())
+                .phoneNumber(driverSignupDTO.getPhoneNumber())
+                .isAvailable(true)
+                .NID(driverSignupDTO.getNID())
+                .password(bCryptPasswordEncoder.encode(driverSignupDTO.getPassword()))
+                .build();
+        Driver newDriver=driverRepository.save(driver);
+        return DriverDto.from(newDriver);
+    }
+
 }

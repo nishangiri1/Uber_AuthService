@@ -1,14 +1,15 @@
 package com.auth.uber_authservice.configurations;
 
 import com.auth.uber_authservice.filters.JwtAuthFilter;
-import com.auth.uber_authservice.services.UserDetailServiceImpl;
+import com.auth.uber_authservice.services.DriverDetailServiceImpl;
+import com.auth.uber_authservice.services.PassengerDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -26,36 +27,53 @@ public class SpringConfig implements WebMvcConfigurer {
 
     @Autowired
     private JwtAuthFilter authFilter;
+
     @Bean
-    public UserDetailsService userDetailsService()
+    public UserDetailsService passengerDetailsService()
     {
-        return new UserDetailServiceImpl();
+        return new PassengerDetailServiceImpl();
+    }
+
+    @Bean
+    public UserDetailsService driverDetailService()
+    {
+        return new DriverDetailServiceImpl();
     }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http)throws Exception
     {
-       return http.csrf(AbstractHttpConfigurer::disable)
-               .cors(AbstractHttpConfigurer::disable)
+        return http.csrf(AbstractHttpConfigurer::disable)
+                .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/v1/auth/signup/*").permitAll()
-                        .requestMatchers("/api/v1/auth/signin/*").permitAll()
+                        .requestMatchers("/api/v1/auth/driver/**").permitAll()
+                        .requestMatchers("/api/v1/auth/passenger/**").permitAll()
                         .requestMatchers("/api/v1/auth/validate").authenticated()
                 )
-               .authenticationProvider(authenticationProvider())
-               .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-               .build();
+                .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
-        return configuration.getAuthenticationManager();
+    public AuthenticationManager authenticationManager(HttpSecurity security) throws Exception{
+       AuthenticationManagerBuilder authenticationManagerBuilder= security.getSharedObject(AuthenticationManagerBuilder.class);
+             return authenticationManagerBuilder.authenticationProvider(passengerAuthenticationProvider())
+                      .authenticationProvider(driverAuthenticationProvider()).build();
+    }
+
+
+    @Bean
+    public AuthenticationProvider passengerAuthenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(passengerDetailsService());
+        authenticationProvider.setPasswordEncoder(passwordEncoder());
+        return authenticationProvider;
     }
 
     @Bean
-    public AuthenticationProvider authenticationProvider(){
-        DaoAuthenticationProvider authenticationProvider=new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(userDetailsService());
+    public AuthenticationProvider driverAuthenticationProvider() {
+        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
+        authenticationProvider.setUserDetailsService(driverDetailService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }

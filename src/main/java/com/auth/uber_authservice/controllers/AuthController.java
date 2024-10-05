@@ -1,8 +1,6 @@
 package com.auth.uber_authservice.controllers;
 
-import com.auth.uber_authservice.dto.AuthRequestDto;
-import com.auth.uber_authservice.dto.PassengerDto;
-import com.auth.uber_authservice.dto.PassengerSignUpRequestDto;
+import com.auth.uber_authservice.dto.*;
 import com.auth.uber_authservice.services.AuthService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -21,23 +19,41 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/signup/passenger")
-    public ResponseEntity<PassengerDto> signUp(@RequestBody PassengerSignUpRequestDto requestDto)
+    @PostMapping("/passenger/signup")
+    public ResponseEntity<PassengerDto> signUp(@RequestBody PassengerSignUpDtp requestDto)
     {
         PassengerDto response=authService.signupPassanger(requestDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/signin/passenger")
-    public ResponseEntity<?> signIn(@RequestBody AuthRequestDto authRequestDto,HttpServletResponse response)
+    @PostMapping("/passenger/signing")
+    public ResponseEntity<?> signInPassenger(@RequestBody AuthRequestDto authRequestDto, HttpServletResponse response)
     {
-        System.out.println("Requested credentials : "+authRequestDto.getEmail()+" "+authRequestDto.getPassword());
+        System.out.println("Requested credentials : "+ authRequestDto.getEmail()+" "+ authRequestDto.getPassword());
         try{
-        return new ResponseEntity<>(authService.authenticateCreateTokenAndSetCookie(authRequestDto,response),HttpStatus.OK);
+        return new ResponseEntity<>(authService.authenticateCreateTokenAndSetCookiePassenger(authRequestDto,response),HttpStatus.OK);
         }catch (AuthenticationException e) {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.FORBIDDEN);
         }
     }
+    @PostMapping("/driver/signing")
+    public ResponseEntity<?> signInDriver(@RequestBody AuthRequestDto authRequestDto, HttpServletResponse response)
+    {
+        System.out.println("Requested credentials : "+ authRequestDto.getEmail()+" "+ authRequestDto.getPassword());
+        try{
+            return new ResponseEntity<>(authService.authenticateCreateTokenAndSetCookieDriver(authRequestDto,response),HttpStatus.OK);
+        }catch (AuthenticationException e) {
+            return new ResponseEntity<>("Invalid email or password", HttpStatus.FORBIDDEN);
+        }
+    }
+
+    @PostMapping("/driver/signup")
+    public ResponseEntity<DriverDto> signUp(@RequestBody DriverSignupDTO driverSignupDTO)
+    {
+        DriverDto response=authService.signupDriver(driverSignupDTO);
+        return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
 
     @GetMapping("/validate")
     public ResponseEntity<?> validate(HttpServletRequest request)
@@ -45,5 +61,6 @@ public class AuthController {
         request.getCookies();
         return new ResponseEntity<>(request.getCookies(),HttpStatus.OK);
     }
+
 
 }
