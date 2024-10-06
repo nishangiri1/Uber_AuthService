@@ -32,8 +32,8 @@ public class DriverDto {
                 .createdAt(driver.getCreatedAt())
                 .password(driver.getPassword())
                 .phoneNumber(driver.getPhoneNumber())
-                .name(driver.getName())
                 .NID(driver.getNID())
+                .name(driver.getFullName())
                 .licenseNumber(driver.getLicenseNumber())
                 .build();
     }

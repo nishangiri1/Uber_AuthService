@@ -1,8 +1,7 @@
 package com.auth.uber_authservice.configurations;
 
 import com.auth.uber_authservice.filters.JwtAuthFilter;
-import com.auth.uber_authservice.services.DriverDetailServiceImpl;
-import com.auth.uber_authservice.services.PassengerDetailServiceImpl;
+import com.auth.uber_authservice.services.UserDetailServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -11,6 +10,7 @@ import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
@@ -23,22 +23,18 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity(prePostEnabled = true,securedEnabled = true,jsr250Enabled = true)
 public class SpringConfig implements WebMvcConfigurer {
 
     @Autowired
     private JwtAuthFilter authFilter;
 
     @Bean
-    public UserDetailsService passengerDetailsService()
+    public UserDetailsService userDetailsService()
     {
-        return new PassengerDetailServiceImpl();
+        return new UserDetailServiceImpl();
     }
 
-    @Bean
-    public UserDetailsService driverDetailService()
-    {
-        return new DriverDetailServiceImpl();
-    }
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http)throws Exception
@@ -46,37 +42,32 @@ public class SpringConfig implements WebMvcConfigurer {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/v1/auth/driver/**").permitAll()
-                        .requestMatchers("/api/v1/auth/passenger/**").permitAll()
+                        .requestMatchers("/api/v1/auth/signup/").permitAll()
+                        .requestMatchers("/api/v1/auth/passenger/**").hasRole("PASSENGER")
+                        .requestMatchers("/api/v1/auth/driver/**").hasRole("DRIVER")
                         .requestMatchers("/api/v1/auth/validate").authenticated()
                 )
+                .authenticationProvider(authenticationProvider())
                 .addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity security) throws Exception{
-       AuthenticationManagerBuilder authenticationManagerBuilder= security.getSharedObject(AuthenticationManagerBuilder.class);
-             return authenticationManagerBuilder.authenticationProvider(passengerAuthenticationProvider())
-                      .authenticationProvider(driverAuthenticationProvider()).build();
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception{
+        return configuration.getAuthenticationManager();
     }
 
 
+
     @Bean
-    public AuthenticationProvider passengerAuthenticationProvider() {
+    public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(passengerDetailsService());
+        authenticationProvider.setUserDetailsService(userDetailsService());
         authenticationProvider.setPasswordEncoder(passwordEncoder());
         return authenticationProvider;
     }
 
-    @Bean
-    public AuthenticationProvider driverAuthenticationProvider() {
-        DaoAuthenticationProvider authenticationProvider = new DaoAuthenticationProvider();
-        authenticationProvider.setUserDetailsService(driverDetailService());
-        authenticationProvider.setPasswordEncoder(passwordEncoder());
-        return authenticationProvider;
-    }
+
 
     @Bean
     public PasswordEncoder passwordEncoder()
@@ -88,4 +79,6 @@ public class SpringConfig implements WebMvcConfigurer {
     {
         return new BCryptPasswordEncoder();
     }
+
+
 }

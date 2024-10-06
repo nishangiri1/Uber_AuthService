@@ -2,10 +2,12 @@ package com.auth.uber_authservice.controllers;
 
 import com.auth.uber_authservice.dto.*;
 import com.auth.uber_authservice.services.AuthService;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,13 +21,15 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/passenger/signup")
+    @PostMapping("/signup/passenger")
     public ResponseEntity<PassengerDto> signUp(@RequestBody PassengerSignUpDtp requestDto)
     {
         PassengerDto response=authService.signupPassanger(requestDto);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
+
+//    @PreAuthorize("hasRole('ROLE_PASSENGER')")
     @PostMapping("/passenger/signing")
     public ResponseEntity<?> signInPassenger(@RequestBody AuthRequestDto authRequestDto, HttpServletResponse response)
     {
@@ -36,6 +40,8 @@ public class AuthController {
             return new ResponseEntity<>("Invalid email or password", HttpStatus.FORBIDDEN);
         }
     }
+
+//    @RolesAllowed(value = "hasRole('ROLE_DRIVER')")
     @PostMapping("/driver/signing")
     public ResponseEntity<?> signInDriver(@RequestBody AuthRequestDto authRequestDto, HttpServletResponse response)
     {
@@ -47,7 +53,7 @@ public class AuthController {
         }
     }
 
-    @PostMapping("/driver/signup")
+    @PostMapping("/signup/driver")
     public ResponseEntity<DriverDto> signUp(@RequestBody DriverSignupDTO driverSignupDTO)
     {
         DriverDto response=authService.signupDriver(driverSignupDTO);

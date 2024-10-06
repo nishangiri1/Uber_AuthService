@@ -1,7 +1,7 @@
 package com.auth.uber_authservice.filters;
 
 import com.auth.uber_authservice.services.JwtService;
-import com.auth.uber_authservice.services.PassengerDetailServiceImpl;
+import com.auth.uber_authservice.services.UserDetailServiceImpl;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -21,13 +21,13 @@ import java.util.Optional;
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-    private final PassengerDetailServiceImpl userDetailService;
+    private final UserDetailServiceImpl userDetailService;
 
     private final JwtService jwtService;
 
 
 
-    public JwtAuthFilter(PassengerDetailServiceImpl userDetailService, JwtService jwtService) {
+    public JwtAuthFilter(UserDetailServiceImpl userDetailService, JwtService jwtService) {
         this.userDetailService = userDetailService;
         this.jwtService = jwtService;
     }

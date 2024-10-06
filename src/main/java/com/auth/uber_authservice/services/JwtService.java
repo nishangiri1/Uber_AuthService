@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
@@ -16,7 +17,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JwtService implements CommandLineRunner {
+public class JwtService  {
     @Value("${jwt.expiry}")
     private int expiry;
     @Value("${jwt.secret}")
@@ -24,9 +25,10 @@ public class JwtService implements CommandLineRunner {
 
     //This method create a new jwt token for us based on a  payload
 
-    public String createToken(Map<String,Object> payload,String username) {
+    public String createToken(Map<String,Object> payload,String username,UserDetails userDetails) {
         Date now =new Date();
         Date expiryDate=new Date(now.getTime()+expiry*1000L);
+        payload.put("role",userDetails.getAuthorities().iterator().next().getAuthority());//todo dbkledjsk
         return Jwts.builder()
                 .claims(payload)
                 .issuedAt(new Date(System.currentTimeMillis()))
@@ -36,9 +38,10 @@ public class JwtService implements CommandLineRunner {
                 .compact();
     }
 
-    public String createToken(String username)
+    public String createToken(UserDetails userDetails)
     {
-        return createToken(new HashMap<>(),username);
+        Map<String,Object> claims=new HashMap<>();
+        return createToken(claims,userDetails.getUsername(),userDetails);
     }
 
     private Claims extractAllPayload(String tokens)
@@ -90,12 +93,12 @@ public class JwtService implements CommandLineRunner {
        return Keys.hmacShaKeyFor(SECRET.getBytes(StandardCharsets.UTF_8));
     }
 
-    @Override
-    public void run(String... args) throws Exception {
-        Map<String,Object> mp=new HashMap<>();
-        mp.put("email","giri@gmail.com");
-        mp.put("PhoneNumber","9809785272");
-        String result=createToken(mp,"Nishan");
-        System.out.println("Generated token is:"+result);
-    }
+//    @Override
+//    public void run(String... args) throws Exception {
+//        Map<String,Object> mp=new HashMap<>();
+//        mp.put("email","giri@gmail.com");
+//        mp.put("PhoneNumber","9809785272");
+//        String result=createToken(mp,"Nishan","girinishan81@gmail.com");
+//        System.out.println("Generated token is:"+result);
+//    }
 }
