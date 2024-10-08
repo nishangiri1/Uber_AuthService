@@ -24,7 +24,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity(prePostEnabled = true,securedEnabled = true,jsr250Enabled = true)
-public class SpringConfig implements WebMvcConfigurer {
+public class SpringConfig{
 
     @Autowired
     private JwtAuthFilter authFilter;
@@ -42,9 +42,10 @@ public class SpringConfig implements WebMvcConfigurer {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .cors(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth->auth
-                        .requestMatchers("/api/v1/auth/signup/").permitAll()
-                        .requestMatchers("/api/v1/auth/passenger/**").hasRole("PASSENGER")
-                        .requestMatchers("/api/v1/auth/driver/**").hasRole("DRIVER")
+                        .requestMatchers("/api/v1/auth/signup/**").permitAll()
+                        .requestMatchers("/api/v1/auth/hurry").hasRole("PASSENGER")
+                        .requestMatchers("/api/v1/auth/furry").hasRole("DRIVER")
+                        .requestMatchers("/api/v1/auth/signing/**").permitAll()
                         .requestMatchers("/api/v1/auth/validate").authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

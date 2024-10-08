@@ -2,13 +2,19 @@ package com.auth.uber_authservice.controllers;
 
 import com.auth.uber_authservice.dto.*;
 import com.auth.uber_authservice.services.AuthService;
+import com.auth.uber_authservice.services.JwtService;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -30,7 +36,7 @@ public class AuthController {
 
 
 //    @PreAuthorize("hasRole('ROLE_PASSENGER')")
-    @PostMapping("/passenger/signing")
+    @PostMapping("/signing/passenger")
     public ResponseEntity<?> signInPassenger(@RequestBody AuthRequestDto authRequestDto, HttpServletResponse response)
     {
         System.out.println("Requested credentials : "+ authRequestDto.getEmail()+" "+ authRequestDto.getPassword());
@@ -42,7 +48,7 @@ public class AuthController {
     }
 
 //    @RolesAllowed(value = "hasRole('ROLE_DRIVER')")
-    @PostMapping("/driver/signing")
+    @PostMapping("/signing/driver")
     public ResponseEntity<?> signInDriver(@RequestBody AuthRequestDto authRequestDto, HttpServletResponse response)
     {
         System.out.println("Requested credentials : "+ authRequestDto.getEmail()+" "+ authRequestDto.getPassword());
@@ -53,11 +59,23 @@ public class AuthController {
         }
     }
 
+
+
     @PostMapping("/signup/driver")
     public ResponseEntity<DriverDto> signUp(@RequestBody DriverSignupDTO driverSignupDTO)
     {
         DriverDto response=authService.signupDriver(driverSignupDTO);
         return new ResponseEntity<>(response, HttpStatus.CREATED);
+    }
+
+    @GetMapping("/hurry")
+    public ResponseEntity<?> hya(){
+        return ResponseEntity.ok("Welcome passenger");
+    }
+
+    @GetMapping("/furry")
+    public ResponseEntity<?> hyaMula(){
+        return ResponseEntity.ok("Welcome Driver. ");
     }
 
 

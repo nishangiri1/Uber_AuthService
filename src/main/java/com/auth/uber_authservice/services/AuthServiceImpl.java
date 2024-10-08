@@ -94,14 +94,16 @@ public class AuthServiceImpl implements AuthService {
         if (authentication.isAuthenticated()) {
             final UserDetails userDetails= userDetailService.loadUserByUsername(authRequestDto.getEmail());
             String jwtToken = jwtService.createToken(userDetails);
-            ResponseCookie cookie = ResponseCookie.from("JwtToken", jwtToken)
+            ResponseCookie cookie = ResponseCookie.from("JwtToken",jwtToken)
                     .httpOnly(false)
                     .secure(false)
                     .path("/")
                     .maxAge(expiryCookie)
                     .build();
             response.setHeader(HttpHeaders.SET_COOKIE, cookie.toString());
-            return AuthResponseDto.builder().success(true).build();
+            return AuthResponseDto.builder().success(true)
+                    .jwt("Bearer "+jwtToken)
+                    .build();
         } else {
             throw new InvalidCredentialsException("Invalid email or password");
         }

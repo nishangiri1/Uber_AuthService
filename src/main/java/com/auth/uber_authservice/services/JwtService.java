@@ -17,31 +17,29 @@ import java.util.Map;
 import java.util.function.Function;
 
 @Service
-public class JwtService  {
+public class JwtService {
     @Value("${jwt.expiry}")
     private int expiry;
     @Value("${jwt.secret}")
     private String SECRET;
 
-    //This method create a new jwt token for us based on a  payload
 
-    public String createToken(Map<String,Object> payload,String username,UserDetails userDetails) {
+    public String createToken(Map<String,Object> payload, UserDetails username) {
         Date now =new Date();
+        payload.put("role",username.getAuthorities().iterator().next().toString());
         Date expiryDate=new Date(now.getTime()+expiry*1000L);
-        payload.put("role",userDetails.getAuthorities().iterator().next().getAuthority());//todo dbkledjsk
         return Jwts.builder()
                 .claims(payload)
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(expiryDate)
-                .subject(username)
+                .subject(username.getUsername())
                 .signWith(getSecretKey())
                 .compact();
     }
 
     public String createToken(UserDetails userDetails)
     {
-        Map<String,Object> claims=new HashMap<>();
-        return createToken(claims,userDetails.getUsername(),userDetails);
+        return createToken(new HashMap<>(),userDetails);
     }
 
     private Claims extractAllPayload(String tokens)
@@ -98,7 +96,7 @@ public class JwtService  {
 //        Map<String,Object> mp=new HashMap<>();
 //        mp.put("email","giri@gmail.com");
 //        mp.put("PhoneNumber","9809785272");
-//        String result=createToken(mp,"Nishan","girinishan81@gmail.com");
+//        String result=createToken(mp,"Nishan");
 //        System.out.println("Generated token is:"+result);
 //    }
 }

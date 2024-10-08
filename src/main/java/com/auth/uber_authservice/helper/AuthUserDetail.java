@@ -10,7 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
+
 
 public class AuthUserDetail  implements UserDetails {
 
@@ -28,8 +28,6 @@ public class AuthUserDetail  implements UserDetails {
         this.password=user.getPassword();
         this.authorities=Collections.singleton(new SimpleGrantedAuthority(user.getRole().getRoleType().name()));
     }
-
-
 
 
     @Override
